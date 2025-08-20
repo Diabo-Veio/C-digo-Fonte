@@ -151,7 +151,7 @@ def Manipulation(Numero_Atm,Atm,sla,Metodo,inicio,nome1,letra,Alterar_Nucleos,Nu
             outfile.write(Novo_Metodo)
         else:
             outfile.write(Metodo)
-        outfile.writelines("*\n")
+        outfile.writelines("\n")
         outfile.write(inicio)
         outfile.writelines([str(i) for i in lista2])
         outfile.writelines([str(i) for i in lista])
@@ -174,6 +174,7 @@ def Copia(inicio,Moleculas,Metodo,Alterar_Nucleos,Nucleos,nome):
             outfile.write(Novo_Metodo)
         else:
             outfile.write(Metodo)
+        outfile.writelines("\n")
         outfile.write(inicio)
         outfile.writelines(Moleculas)
 
