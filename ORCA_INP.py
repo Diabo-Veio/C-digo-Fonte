@@ -151,6 +151,7 @@ def Manipulation(Numero_Atm,Atm,sla,Metodo,inicio,nome1,letra,Alterar_Nucleos,Nu
             outfile.write(Novo_Metodo)
         else:
             outfile.write(Metodo)
+        outfile.writelines("*\n")
         outfile.write(inicio)
         outfile.writelines([str(i) for i in lista2])
         outfile.writelines([str(i) for i in lista])
@@ -181,4 +182,4 @@ def Executavel():
     with open(caminho + "Resultados/" + "Energias" + ".ps1","w") as outfile:
         for i in Arquivos_gerados:
             out = i.removesuffix(".inp")
-            outfile.writelines("C:\orca503\orca.exe " + i + ">" + out + ".out \n")
+            outfile.writelines("C:\orca503\orca.exe " + i + " > " + out + ".out \n")
