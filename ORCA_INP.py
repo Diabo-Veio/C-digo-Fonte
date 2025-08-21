@@ -16,12 +16,13 @@ def abrir():
 
 def String_Manipulation(Moleculas,nome,Numero_Atm,Metodo,Alterar_Nucleos,Nucleos,Alterar_Ram,Ram):
     global Molecula, Molecula_Alvo
-    ## REMOVE O METODO INICIAL E O SEPARA O * QUE MARCA O INICIO DOS ATOMOS PARA DICIONARMOS DEPOIS ##
+    ## VERIFICA SE O ARQUIVO ESCOLHIDO É VALIDO (RECEM SAÍDO DO AVOGRADO) ##
     if Moleculas[:73] == '''# avogadro generated ORCA input file 
 # Basic Mode
 # 
 ! RHF SP def2-SVP 
 ''':
+        ## REMOVE O METODO INICIAL E O SEPARA O * QUE MARCA O INICIO DOS ATOMOS PARA DICIONARMOS DEPOIS ##
         inicio = Moleculas[73:84]
         Mol_Limpas = Moleculas[84:]
 
