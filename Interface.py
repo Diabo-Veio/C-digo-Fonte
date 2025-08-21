@@ -6,12 +6,15 @@ from tkinter import messagebox
 import sys
 import os
 
-## GAMBIARRA PARA PEGAR O CAMINHO ABSOLUTO DA IMAGEM E ADICIONAR O .EXE ##
+#-----------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------#
+
+## GAMBIARRA PARA PEGAR O CAMINHO ABSOLUTO DA IMAGEM E ADICIONAR O .EXE (funciona no pyinstaller)##
 def resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
     base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
     return os.path.join(base_path, relative_path)
 
+#-----------------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------------#
 
 ## CRIA INSTANCIA DO TKINTER ##
@@ -28,9 +31,10 @@ Numero_Atm = ""
 arquivos = []
 
 #-----------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------#
 
 ## ETIQUETA PARA IDENTIFICAR O CAMPO DE DIGITAÇÃO ##
-label1 = tk.Label(root,text="Número de Átomos").grid(column=0,row=0)
+label1 = tk.Label(root,text="Número de átomos").grid(column=0,row=0)
 
 ## CAMPO PARA DIGITAR O NUMERO DE ATOMOS ##
 entrada1 = tk.Entry(root)
@@ -50,12 +54,13 @@ tk.Checkbutton(root,text="Alterar número de nucleos", variable = Alterar_Nucleo
 entrada2 = tk.Entry(root)
 
 ## BOTÃO PARA ALTERAR A RAM ##
-tk.Checkbutton(root,text="Alterar a Ram", variable = Alterar_Ram,command=lambda:Alt_Ram()).grid(column=0,row=9)
+tk.Checkbutton(root,text="Alterar memória ram", variable = Alterar_Ram,command=lambda:Alt_Ram()).grid(column=0,row=9)
 entrada3 = tk.Entry(root)
 
 ## BOTÃO GERAR OS OUTPUTS ##
-button2 = tk.Button(root,text="Gerar Arquivos", command= lambda:Gerar()).grid(column=0,row=11)
+button2 = tk.Button(root,text="Gerar arquivos", command= lambda:Gerar()).grid(column=0,row=11)
 
+#-----------------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------------#
 
 ## MOSTRA/ESCONDE CAMPO PARA MUDANÇA DE NÚCLEOS ##
@@ -64,6 +69,7 @@ def Alt_Nucleos():
         entrada2.grid(column=0,row=8)
     else:
         entrada2.grid_forget()
+
 ## MOSTRA/ESCONDE CAMPO PARA MUDANÇA DE RAM ##
 def Alt_Ram():
     if(Alterar_Ram.get()):
@@ -83,6 +89,34 @@ def Escolher_Arquivo():
     else:
        Nova_Aba()
 
+## METODO PARA CHAMAR A EDIÇÃO DE STRINGS ##
+def Gerar():
+    if arquivos != []:
+        ## ZERA AS VARIAVEIS PARA ATRIBUIR NOVOS VALORES ##
+        Nucleos = 0
+        Ram = 0
+        ## DEFINE O NUMERO DE NÚCLEOS E MEMÓRIA RAM ##
+        if(Alterar_Nucleos):
+            Nucleos = entrada2.get()
+        if(Alterar_Ram):
+            Ram = entrada3.get()
+        ## CHAMA O METODO UM VEZ POR ARQUIVO ##
+        for arquivo in arquivos:
+            ## LÊ O CAMINHO PARA O ARQUIVOS ##
+            f = open(arquivo)
+            ## LÊ O CONTEUDO DO ARQUIVO EM QUESTÃO ##
+            Molecula = f.read()
+            ## CHAMA O METODO PARA EDIÇÃO DAS LINHAS ##
+            a = String_Manipulation(Molecula,arquivo,int(Numero_Atm),Metodo.get(),Alterar_Nucleos.get(),Nucleos,Alterar_Ram.get(),Ram)
+            ## CHAMA O ERRO SE O ARQUIVO SELECIONADO NÃO FOR VALIDO ##
+            if a == 1:
+                messagebox.showerror(title="Erro",message="Selecione o arquivo correto")
+        ## CRIA O EXECUTÁVEL PARA CHAMAR O ORCA ##
+        print(Arquivos_gerados)
+        Executavel()
+        zerar()
+    else: Nova_Aba()
+
 ## ERRO DO FAUSTÃO ##
 class Nova_Aba():
     def __init__(self):
@@ -90,43 +124,24 @@ class Nova_Aba():
     def abrir(self):
         ## ABRE NOVA ABA ##
         self.new_window = tk.Toplevel()
-        self.new_window.title("ERRRRROOOU")
-        self.new_window.geometry("253x253") 
+        self.new_window.title("INFORMAÇÕES INCOMPLETAS")
+        self.new_window.geometry("253x275") 
         ## ABRE A IMAGEM E MUDA O TAMANHO ##
         self.image_orig = PhotoImage(file=resource_path("erro.png"))
         self.image = self.image_orig.subsample(2, 2)
         ## COLOCA A IMAGEM NA TELA ##
         self.image_label = tk.Label(self.new_window, image=self.image)
-        self.image_label.grid(column=0,row=0)
+        self.image_label.grid(column=0,row=0,sticky="W")
         self.image_label.image = self.image
+        self.label = tk.Label(self.new_window,text="Arquivos ou Nº de Átomos Faltando")
+        self.label.grid(column=0,row=1)
 
-## METODO PARA CHAMAR A EDIÇÃO DE STRINGS ##
-def Gerar():
-    global Arquivos_gerados
-    ## DEFINE OS NUCLEOS COMO ZERO  SÓ PRA PASSAR COMO ARGUMENTO SE O ALTERAR_NUCLEOS FOR FALSO ##
-    Nucleos = 0
-    Ram = 0
-    ## DEFINE O NUMERO DE NÚCLEOS SE ALTERAR_NUCLEOS FOR VERDADEIRO ##
-    if(Alterar_Nucleos):
-        Nucleos = entrada2.get()
-    if(Alterar_Ram):
-        Ram = entrada3.get()
-    ## CHAMA O METODO UM VEZ POR ARQUIVO ##
-    Arquivos_gerados = []
-    for arquivo in arquivos:
-        ## LÊ O CAMINHO PARA O ARQUIVOS ##
-        f = open(arquivo)
-        ## LÊ O CONTEUDO DO ARQUIVO EM QUESTÃO ##
-        Molecula = f.read()
-        ## CHAMA O METODO PARA EDIÇÃO DAS LINHAS ##
-        a = String_Manipulation(Molecula,arquivo,int(Numero_Atm),Metodo.get(),Alterar_Nucleos.get(),Nucleos,Alterar_Ram.get(),Ram)
-        if a == 1:
-            messagebox.showerror(title="Erro",message="Selecione o arquivo correto")
-    ## CRIA O EXECUTÁVEL PARA CHAMAR O ORCA ##
-    Executavel()
-
+## ABRE O AVISO PARA LEMBRAR SOBRE O ARQUIVO DO AVOGRADO ##
 def aviso():
     messagebox.showerror(title="LEMBRE-SE",message="ESSE PROGRAMA DEVE SER USADO DIRETAMENTE EM ARQUIVOS GERADOS PELO AVOGRADO")
-## INICIA O LOOP DA INSTANCIA DO TKINTER ##
+
+## CHAMA O AVISO ##
 aviso()
+
+## INICIA O LOOP DA INSTANCIA DO TKINTER ##
 root.mainloop()

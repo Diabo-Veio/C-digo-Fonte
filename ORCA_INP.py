@@ -1,93 +1,117 @@
 from tkinter.filedialog import askopenfilenames
 from io import StringIO
 from string import ascii_uppercase as alc
+from pathlib import Path
 import os
 import errno
+#-----------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------#
 
 ## VARIAVEL GLOBAL PARA ARMAZENAR O NOME DOS ARQUIVOS ##
 Arquivos_gerados = []
 caminho = ""
+## GLOBAL PARA DEFINIR O METODO E USAR NA EDIÇÃO E CÓPIA ##
+Novo_Metodo = ""
+
+#-----------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------#
+
+## MÉTODOS ##
+Metodo_original = '''# avogadro generated ORCA input file 
+# Basic Mode
+# 
+! RHF SP def2-SVP 
+'''
+Metodo_1 = '''! SP wB97X-d3 RIJCOSX def2-tzvp def2/J def2-tzvp/C TightSCF
+%pal nprocs 22 end 
+%maxcore 3000
+%scf Guess Pmodel end'''
+Metodo_2 = '''! SP wB97X-d3 RIJCOSX def2-tzvp def2/J def2-tzvp/C TightSCF
+%pal nprocs 19 end 
+%maxcore 3000
+%scf Guess Pmodel end'''
+Metodo_3 = '''! SP wB97X-d3 RIJCOSX def2-tzvp def2/J def2-tzvp/C TightSCF
+%pal nprocs 22 end 
+%maxcore 3000
+%scf Guess Hueckel end'''
+Metodo_4 = '''! SP wB97X-d3 RIJCOSX def2-tzvp def2/J def2-tzvp/C TightSCF
+%pal nprocs 19 end 
+%maxcore 3000
+%scf Guess Hueckel end'''
+
+#-----------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------#
 
 ## ABRE O ARQUIVO ##
 def abrir():
     filename = askopenfilenames()
     return filename
 
+## ZERA A LISTA DE  ARQUIVOS GERADOS CASO O PROGRAMA SEJA EXECUTADO MAIS DE UMA VEZ ##
+def zerar():
+    global Arquivos_gerados
+    Arquivos_gerados = []
 
-def String_Manipulation(Moleculas,nome,Numero_Atm,Metodo,Alterar_Nucleos,Nucleos,Alterar_Ram,Ram):
-    global Molecula, Molecula_Alvo
+## METODO INICIAL PARA DEFINIR OS PÂMETROS PARA A MANIPULAÇÃO DAS STRINGS ##
+def String_Manipulation(Moleculas,nome,Numero_Atm,Metodo_escolhido,Alterar_Nucleos,Nucleos,Alterar_Ram,Ram):
+    global Molecula, Molecula_Alvo, Arquivos_gerados
+
+    ## CONTADORES ##
+    Atm = 0
+    Molecula_Alvo = 0
+    Molecula = 1
+
     ## VERIFICA SE O ARQUIVO ESCOLHIDO É VALIDO (RECEM SAÍDO DO AVOGRADO) ##
-    if Moleculas[:73] == '''# avogadro generated ORCA input file 
-# Basic Mode
-# 
-! RHF SP def2-SVP 
-''':
+    if Moleculas[:73] == Metodo_original:
+
         ## REMOVE O METODO INICIAL E O SEPARA O * QUE MARCA O INICIO DOS ATOMOS PARA DICIONARMOS DEPOIS ##
         inicio = Moleculas[73:84]
         Mol_Limpas = Moleculas[84:]
 
         ## DEFINE O METODO ##
-        if Metodo == 1:
-            Metodo_escolhido = '''! SP wB97X-d3 RIJCOSX def2-tzvp def2/J def2-tzvp/C TightSCF
-%pal nprocs 22 end 
-%maxcore 3000
-%scf Guess Pmodel end'''
-        elif Metodo == 2:
-            Metodo_escolhido ='''! SP wB97X-d3 RIJCOSX def2-tzvp def2/J def2-tzvp/C TightSCF
-%pal nprocs 19 end 
-%maxcore 3000
-%scf Guess Pmodel end'''
-        elif Metodo == 3:
-            Metodo_escolhido ='''! SP wB97X-d3 RIJCOSX def2-tzvp def2/J def2-tzvp/C TightSCF
-%pal nprocs 22 end 
-%maxcore 3000
-%scf Guess Hueckel end'''
-        elif Metodo == 4:
-            Metodo_escolhido ='''! SP wB97X-d3 RIJCOSX def2-tzvp def2/J def2-tzvp/C TightSCF
-%pal nprocs 19 end 
-%maxcore 3000
-%scf Guess Hueckel end'''
+        if Metodo_escolhido == 1:
+            Metodo = Metodo_1
+        elif Metodo_escolhido == 2:
+            Metodo = Metodo_2
+        elif Metodo_escolhido == 3:
+            Metodo = Metodo_3
+        elif Metodo_escolhido == 4:
+            Metodo = Metodo_4
 
         ## DEFINE O NUMERO DE MOLECULAS A VERIFICAR ##
         Numero_Mol = (Mol_Limpas.count("\n")-2)/Numero_Atm
 
-        ## CONTADORES ##
-        Atm = 0
-        i = 0
-        Molecula_Alvo = 0
-        Molecula = 1
-
         ## CHAMA O METODO PARA EDITARMOS OS ARQUIVOS ##
         for i in range(int(Numero_Mol)):
             Molecula_Alvo += 1
-            sla = StringIO(Mol_Limpas)
-            Manipulation(Numero_Atm,Atm,sla,Metodo_escolhido,inicio,nome,alc[i],Alterar_Nucleos,Nucleos,Alterar_Ram,Ram)
-            i+=1
+            Texto = StringIO(Mol_Limpas)
+            Manipulation(Numero_Atm,Atm,Texto,Metodo,inicio,nome,alc[i],Alterar_Nucleos,Nucleos,Alterar_Ram,Ram)
+        
         ## CRIA UMA CÓPIA DO ARQUIVO ORIGINAL NA PASTA DE RESULTADOS ##
-        sla = StringIO(Mol_Limpas)
-        Copia(inicio,sla,Metodo_escolhido,Alterar_Nucleos,Nucleos,nome,Alterar_Ram,Ram)
+        Texto = StringIO(Mol_Limpas)
+        Copia(inicio,Texto,nome)
         return 0
     ## RETORNA 1 NA FUNÇÃO CASO O ARQUIVO SEJA INVALIDO PARA LEVANTARMOS UM ERRO NO INTERFACE.PY ##
     else:
         return 1
 
 ## METODO PARA EDIÇÃO DE STRINGS ##
-def Manipulation(Numero_Atm,Atm,sla,Metodo,inicio,nome1,letra,Alterar_Nucleos,Nucleos,Alterar_Ram,Ram):
-    global Molecula, Arquivos_gerados,caminho
+def Manipulation(Numero_Atm,Atm,Texto,Metodo,inicio,nome_original,letra,Alterar_Nucleos,Nucleos,Alterar_Ram,Ram):
+    global Molecula, Arquivos_gerados,caminho,Novo_Metodo,nome_certo
 
     ## LISTAS PARA INSERIRMOS AS LINHAS ##
     lista = []
     lista2 = []
     lista3 = []
     Molecula = 1
+    caminho = ""
 
     ## DEFINE O NOME DO ARQUIVO ##
-    nome = nome1.removesuffix(".inp")
+    nome = nome_original.removesuffix(".inp")
     res = nome.split("/", -1)
     nome_certo = res[-1] if len(res) > 1 else ""
 
     ## DEFINE O CAMINHO PARA O ARQUIVO ##
-    caminho = ''
     res.remove(nome_certo)
     for i in res:
         caminho += i + '/'
@@ -96,7 +120,7 @@ def Manipulation(Numero_Atm,Atm,sla,Metodo,inicio,nome1,letra,Alterar_Nucleos,Nu
     ## LOOP PARA EDIÇÃO DAS LINHAS ##
     while True:
         ## LÊ AS LINHAS ##
-        linha = sla.readline()
+        linha = Texto.readline()
         
         ## VERIFICA SE CHEGAMOS AO FINAL NO ARQUIVO PARA PARAR A ITERAÇÃO ##
         if linha == "*\n":
@@ -110,17 +134,17 @@ def Manipulation(Numero_Atm,Atm,sla,Metodo,inicio,nome1,letra,Alterar_Nucleos,Nu
         ## ADICIONA A LINHA NA LISTA SE CHEGAMOS NA MOLECULA ALVO ##
         if Molecula == Molecula_Alvo:
             while True:
-                ## PASSA PARA O PRÓXIMO ÁTOMO ##
-                Atm += 1
                 ## ADICIONA LINHA NA LISTA ##
                 lista.append(linha)
+                ## PASSA PARA O PRÓXIMO ÁTOMO ##
+                Atm += 1
                 ## VERIFICA SE ACABOU A MOLECULA, PASSA PARA A PROXIMA MOLECULA E ENCERRA O LOOP ##
                 if Atm == Numero_Atm:
                     Atm = 0
                     Molecula += 1
                     break
                 ## LÊ A PROXIMA LINHA ##
-                linha = sla.readline()
+                linha = Texto.readline()
                 
         ## INICIA A EDIÇÃO SE NÃO ESTAMOS NA MOLECULA ALVO ##
         elif Molecula < Molecula_Alvo or Molecula > Molecula_Alvo:
@@ -146,21 +170,19 @@ def Manipulation(Numero_Atm,Atm,sla,Metodo,inicio,nome1,letra,Alterar_Nucleos,Nu
     
     ##EDITA O METODO
     if(Alterar_Nucleos):
-        Novo_Metodo = Metodo.replace(Metodo[72:74], Nucleos)
-    if(Alterar_Ram and Alterar_Nucleos):
-        Novo_Metodo_2 = Novo_Metodo.replace(Metodo[89:93], Ram)
-    else:
-        Novo_Metodo = Metodo.replace(Metodo[89:93], Ram)
+        a = Metodo.replace(Metodo[72:74], Nucleos)
+        Novo_Metodo = a
+        if(Alterar_Ram):
+            b = a.replace(Metodo[89:93], Ram)
+            Novo_Metodo = b
+    elif(Alterar_Ram):
+        a = Metodo.replace(Metodo[89:93], Ram)
+        Novo_Metodo = a
+    else: Novo_Metodo = Metodo
 
     ## ESCREVE O ARQUIVO ##
     with open(caminho + "Resultados/" + nome_completo,"w") as outfile:
-        Arquivos_gerados.append(nome_completo)
-        if(Alterar_Ram and Alterar_Nucleos):
-            outfile.write(Novo_Metodo_2)
-        elif (Alterar_Nucleos or Alterar_Ram):
-            outfile.write(Novo_Metodo)
-        else:
-            outfile.write(Metodo)
+        outfile.write(Novo_Metodo)
         outfile.writelines("\n")
         outfile.write(inicio)
         outfile.writelines([str(i) for i in lista2])
@@ -168,38 +190,32 @@ def Manipulation(Numero_Atm,Atm,sla,Metodo,inicio,nome1,letra,Alterar_Nucleos,Nu
         outfile.writelines([str(i) for i in lista3])
         outfile.writelines("*\n")
 
+    ## ADICIONA O ARQUIVO NA LISTA PARA GERAR O EXECUTÁVEL ##
+    Arquivos_gerados.append(nome_completo)
+
 ## COPIA O ARQUIVO QUE ESTÁ SENDO EDITADO PARA A PASTA DE RESULTADOS ##
-def Copia(inicio,Moleculas,Metodo,Alterar_Nucleos,Nucleos,nome,Alterar_Ram,Ram):
+def Copia(inicio,Moleculas,nome):
     global Arquivos_gerados
-    
+
     ## DEFINE O NOME DO ARQUIVO ##
     res = nome.split("/", -1)
     nome_certo = res[-1] if len(res) > 1 else ""
 
-    ##EDITA O METODO
-    if(Alterar_Nucleos):
-        Novo_Metodo = Metodo.replace(Metodo[72:74], Nucleos)
-    if(Alterar_Ram and Alterar_Nucleos):
-        Novo_Metodo_2 = Novo_Metodo.replace(Metodo[89:93], Ram)
-    else:
-        Novo_Metodo = Metodo.replace(Metodo[89:93], Ram)
-
     ## ESCREVE O ARQUIVO DE SAIDA ##
     with open(caminho + "Resultados/" + nome_certo,"w") as outfile:
-        Arquivos_gerados.append(nome_certo)
-        if(Alterar_Ram and Alterar_Nucleos):
-            outfile.write(Novo_Metodo_2)
-        elif (Alterar_Nucleos or Alterar_Ram):
-            outfile.write(Novo_Metodo)
-        else:
-            outfile.write(Metodo)
+        outfile.write(Novo_Metodo)
         outfile.writelines("\n")
         outfile.write(inicio)
         outfile.writelines(Moleculas)
+    ## ADICIONA O ARQUIVO NA LISTA PARA GERAR O EXECUTÁVEL ##
+    Arquivos_gerados.append(nome_certo)
 
 ## GERA O EXECUTAVEL PARA O ORCA ##
 def Executavel():
-    with open(caminho + "Resultados/" + "Energias" + ".ps1","w") as outfile:
+    ## CAMINHO PARA O EXECUTAVEL QUE CHAMA O ORCA ##
+    Executavel_Orca = Path(caminho + "Resultados/" + "Energias" + ".ps1")
+    ## ESCREVE O ARQUIVO EXECUTÁVEL DO ORCA ##
+    with open(Executavel_Orca,"w") as outfile:
         for i in Arquivos_gerados:
             out = i.removesuffix(".inp")
-            outfile.writelines("C:\orca503\orca.exe " + i + " > " + out + ".out \n")
+            outfile.write("C:\orca503\orca.exe " + i + " > " + out + ".out \n")
