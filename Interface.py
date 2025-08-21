@@ -58,12 +58,13 @@ button2 = tk.Button(root,text="Gerar Arquivos", command= lambda:Gerar()).grid(co
 
 #-----------------------------------------------------------------------------------#
 
-## MOSTRA/ESCONDE CAMPO PARA MUDANÇA DE NÚCLEOS
+## MOSTRA/ESCONDE CAMPO PARA MUDANÇA DE NÚCLEOS ##
 def Alt_Nucleos():
     if(Alterar_Nucleos.get()):
         entrada2.grid(column=0,row=8)
     else:
         entrada2.grid_forget()
+## MOSTRA/ESCONDE CAMPO PARA MUDANÇA DE RAM ##
 def Alt_Ram():
     if(Alterar_Ram.get()):
         entrada3.grid(column=0,row=10)

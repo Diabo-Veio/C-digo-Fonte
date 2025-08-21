@@ -27,7 +27,6 @@ def String_Manipulation(Moleculas,nome,Numero_Atm,Metodo,Alterar_Nucleos,Nucleos
         Mol_Limpas = Moleculas[84:]
 
         ## DEFINE O METODO ##
-        
         if Metodo == 1:
             Metodo_escolhido = '''! SP wB97X-d3 RIJCOSX def2-tzvp def2/J def2-tzvp/C TightSCF
 %pal nprocs 22 end 
@@ -68,21 +67,25 @@ def String_Manipulation(Moleculas,nome,Numero_Atm,Metodo,Alterar_Nucleos,Nucleos
         sla = StringIO(Mol_Limpas)
         Copia(inicio,sla,Metodo_escolhido,Alterar_Nucleos,Nucleos,nome,Alterar_Ram,Ram)
         return 0
+    ## RETORNA 1 NA FUNÇÃO CASO O ARQUIVO SEJA INVALIDO PARA LEVANTARMOS UM ERRO NO INTERFACE.PY ##
     else:
         return 1
 
 ## METODO PARA EDIÇÃO DE STRINGS ##
 def Manipulation(Numero_Atm,Atm,sla,Metodo,inicio,nome1,letra,Alterar_Nucleos,Nucleos,Alterar_Ram,Ram):
     global Molecula, Arquivos_gerados,caminho
+
     ## LISTAS PARA INSERIRMOS AS LINHAS ##
     lista = []
     lista2 = []
     lista3 = []
     Molecula = 1
+
     ## DEFINE O NOME DO ARQUIVO ##
     nome = nome1.removesuffix(".inp")
     res = nome.split("/", -1)
     nome_certo = res[-1] if len(res) > 1 else ""
+
     ## DEFINE O CAMINHO PARA O ARQUIVO ##
     caminho = ''
     res.remove(nome_certo)
@@ -168,6 +171,7 @@ def Manipulation(Numero_Atm,Atm,sla,Metodo,inicio,nome1,letra,Alterar_Nucleos,Nu
 ## COPIA O ARQUIVO QUE ESTÁ SENDO EDITADO PARA A PASTA DE RESULTADOS ##
 def Copia(inicio,Moleculas,Metodo,Alterar_Nucleos,Nucleos,nome,Alterar_Ram,Ram):
     global Arquivos_gerados
+    
     ## DEFINE O NOME DO ARQUIVO ##
     res = nome.split("/", -1)
     nome_certo = res[-1] if len(res) > 1 else ""
