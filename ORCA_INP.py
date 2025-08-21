@@ -14,7 +14,7 @@ def abrir():
     return filename
 
 
-def String_Manipulation(Moleculas,nome,Numero_Atm,Metodo,Alterar_Nucleos,Nucleos):
+def String_Manipulation(Moleculas,nome,Numero_Atm,Metodo,Alterar_Nucleos,Nucleos,Alterar_Ram,Ram):
     global Molecula, Molecula_Alvo
     ## REMOVE O METODO INICIAL E O SEPARA O * QUE MARCA O INICIO DOS ATOMOS PARA DICIONARMOS DEPOIS ##
     if Moleculas[:73] == '''# avogadro generated ORCA input file 
@@ -61,17 +61,17 @@ def String_Manipulation(Moleculas,nome,Numero_Atm,Metodo,Alterar_Nucleos,Nucleos
         for i in range(int(Numero_Mol)):
             Molecula_Alvo += 1
             sla = StringIO(Mol_Limpas)
-            Manipulation(Numero_Atm,Atm,sla,Metodo_escolhido,inicio,nome,alc[i],Alterar_Nucleos,Nucleos)
+            Manipulation(Numero_Atm,Atm,sla,Metodo_escolhido,inicio,nome,alc[i],Alterar_Nucleos,Nucleos,Alterar_Ram,Ram)
             i+=1
         ## CRIA UMA CÓPIA DO ARQUIVO ORIGINAL NA PASTA DE RESULTADOS ##
         sla = StringIO(Mol_Limpas)
-        Copia(inicio,sla,Metodo_escolhido,Alterar_Nucleos,Nucleos,nome)
+        Copia(inicio,sla,Metodo_escolhido,Alterar_Nucleos,Nucleos,nome,Alterar_Ram,Ram)
         return 0
     else:
         return 1
 
 ## METODO PARA EDIÇÃO DE STRINGS ##
-def Manipulation(Numero_Atm,Atm,sla,Metodo,inicio,nome1,letra,Alterar_Nucleos,Nucleos):
+def Manipulation(Numero_Atm,Atm,sla,Metodo,inicio,nome1,letra,Alterar_Nucleos,Nucleos,Alterar_Ram,Ram):
     global Molecula, Arquivos_gerados,caminho
     ## LISTAS PARA INSERIRMOS AS LINHAS ##
     lista = []
@@ -143,11 +143,17 @@ def Manipulation(Numero_Atm,Atm,sla,Metodo,inicio,nome1,letra,Alterar_Nucleos,Nu
     ##EDITA O METODO
     if(Alterar_Nucleos):
         Novo_Metodo = Metodo.replace(Metodo[72:74], Nucleos)
+    if(Alterar_Ram and Alterar_Nucleos):
+        Novo_Metodo_2 = Novo_Metodo.replace(Metodo[89:93], Ram)
+    else:
+        Novo_Metodo = Metodo.replace(Metodo[89:93], Ram)
 
     ## ESCREVE O ARQUIVO ##
     with open(caminho + "Resultados/" + nome_completo,"w") as outfile:
         Arquivos_gerados.append(nome_completo)
-        if (Alterar_Nucleos):
+        if(Alterar_Ram and Alterar_Nucleos):
+            outfile.write(Novo_Metodo_2)
+        elif (Alterar_Nucleos or Alterar_Ram):
             outfile.write(Novo_Metodo)
         else:
             outfile.write(Metodo)
@@ -159,18 +165,26 @@ def Manipulation(Numero_Atm,Atm,sla,Metodo,inicio,nome1,letra,Alterar_Nucleos,Nu
         outfile.writelines("*\n")
 
 ## COPIA O ARQUIVO QUE ESTÁ SENDO EDITADO PARA A PASTA DE RESULTADOS ##
-def Copia(inicio,Moleculas,Metodo,Alterar_Nucleos,Nucleos,nome):
+def Copia(inicio,Moleculas,Metodo,Alterar_Nucleos,Nucleos,nome,Alterar_Ram,Ram):
     global Arquivos_gerados
     ## DEFINE O NOME DO ARQUIVO ##
     res = nome.split("/", -1)
     nome_certo = res[-1] if len(res) > 1 else ""
-    ## VERIFICA SE HOUVE MUDANÇA NA QUANTIDADE DE NÚCLEOS ##
+
+    ##EDITA O METODO
     if(Alterar_Nucleos):
         Novo_Metodo = Metodo.replace(Metodo[72:74], Nucleos)
+    if(Alterar_Ram and Alterar_Nucleos):
+        Novo_Metodo_2 = Novo_Metodo.replace(Metodo[89:93], Ram)
+    else:
+        Novo_Metodo = Metodo.replace(Metodo[89:93], Ram)
+
     ## ESCREVE O ARQUIVO DE SAIDA ##
     with open(caminho + "Resultados/" + nome_certo,"w") as outfile:
         Arquivos_gerados.append(nome_certo)
-        if (Alterar_Nucleos):
+        if(Alterar_Ram and Alterar_Nucleos):
+            outfile.write(Novo_Metodo_2)
+        elif (Alterar_Nucleos or Alterar_Ram):
             outfile.write(Novo_Metodo)
         else:
             outfile.write(Metodo)

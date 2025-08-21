@@ -21,6 +21,7 @@ root.title("Pontuador")
 ## VARIAVEL PARA DEFINIR O METODO E NUMERO DE NUCLEOS##
 Metodo = tk.IntVar(value=0)
 Alterar_Nucleos = tk.BooleanVar(value=False)
+Alterar_Ram = tk.BooleanVar(value=False)
 
 ## VARIÁVEIS GLOBAIS ##
 Numero_Atm = ""
@@ -48,8 +49,12 @@ button1 = tk.Button(root,text="selecionar arquivos", command= lambda:Escolher_Ar
 tk.Checkbutton(root,text="Alterar número de nucleos", variable = Alterar_Nucleos,command=lambda:Alt_Nucleos()).grid(column=0,row=7)
 entrada2 = tk.Entry(root)
 
+## BOTÃO PARA ALTERAR A RAM ##
+tk.Checkbutton(root,text="Alterar a Ram", variable = Alterar_Ram,command=lambda:Alt_Ram()).grid(column=0,row=9)
+entrada3 = tk.Entry(root)
+
 ## BOTÃO GERAR OS OUTPUTS ##
-button2 = tk.Button(root,text="Gerar Arquivos", command= lambda:Gerar()).grid(column=0,row=9)
+button2 = tk.Button(root,text="Gerar Arquivos", command= lambda:Gerar()).grid(column=0,row=11)
 
 #-----------------------------------------------------------------------------------#
 
@@ -59,6 +64,11 @@ def Alt_Nucleos():
         entrada2.grid(column=0,row=8)
     else:
         entrada2.grid_forget()
+def Alt_Ram():
+    if(Alterar_Ram.get()):
+        entrada3.grid(column=0,row=10)
+    else:
+        entrada3.grid_forget()
 
 ## METODO PARA CHAMAR A EDIÇÃO DE STRINGS ##
 def Escolher_Arquivo():
@@ -94,9 +104,12 @@ def Gerar():
     global Arquivos_gerados
     ## DEFINE OS NUCLEOS COMO ZERO  SÓ PRA PASSAR COMO ARGUMENTO SE O ALTERAR_NUCLEOS FOR FALSO ##
     Nucleos = 0
+    Ram = 0
     ## DEFINE O NUMERO DE NÚCLEOS SE ALTERAR_NUCLEOS FOR VERDADEIRO ##
     if(Alterar_Nucleos):
         Nucleos = entrada2.get()
+    if(Alterar_Ram):
+        Ram = entrada3.get()
     ## CHAMA O METODO UM VEZ POR ARQUIVO ##
     Arquivos_gerados = []
     for arquivo in arquivos:
@@ -105,7 +118,7 @@ def Gerar():
         ## LÊ O CONTEUDO DO ARQUIVO EM QUESTÃO ##
         Molecula = f.read()
         ## CHAMA O METODO PARA EDIÇÃO DAS LINHAS ##
-        a = String_Manipulation(Molecula,arquivo,int(Numero_Atm),Metodo.get(),Alterar_Nucleos.get(),Nucleos)
+        a = String_Manipulation(Molecula,arquivo,int(Numero_Atm),Metodo.get(),Alterar_Nucleos.get(),Nucleos,Alterar_Ram.get(),Ram)
         if a == 1:
             messagebox.showerror(title="Erro",message="Selecione o arquivo correto")
     ## CRIA O EXECUTÁVEL PARA CHAMAR O ORCA ##
