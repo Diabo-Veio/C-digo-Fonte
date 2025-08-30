@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import PhotoImage
-from ORCA_INP import *
+from Escolha import *
 from tkinter.ttk import *
 from tkinter import messagebox
 import sys
@@ -106,15 +106,17 @@ def Gerar():
             f = open(arquivo)
             ## LÊ O CONTEUDO DO ARQUIVO EM QUESTÃO ##
             Molecula = f.read()
-            ## CHAMA O METODO PARA EDIÇÃO DAS LINHAS ##
-            a = String_Manipulation(Molecula,arquivo,int(Numero_Atm),Metodo.get(),Alterar_Nucleos.get(),Nucleos,Alterar_Ram.get(),Ram)
-            ## CHAMA O ERRO SE O ARQUIVO SELECIONADO NÃO FOR VALIDO ##
-            if a == 1:
-                messagebox.showerror(title="Erro",message="Selecione o arquivo correto")
+            if(arquivo.endswith(".inp")):
+                ## CHAMA O METODO PARA EDIÇÃO DAS LINHAS ##
+                a = tipo("inp",Molecula,arquivo,int(Numero_Atm),Metodo.get(),Alterar_Nucleos.get(),Nucleos,Alterar_Ram.get(),Ram)
+                ## CHAMA O ERRO SE O ARQUIVO SELECIONADO NÃO FOR VALIDO ##
+                if a == 1:
+                    messagebox.showerror(title="Erro",message="Selecione o arquivo correto")
+            elif(arquivo.endswith(".pdb")):
+                tipo("pdb",Molecula,arquivo,int(Numero_Atm),Metodo.get(),Alterar_Nucleos.get(),Nucleos,Alterar_Ram.get(),Ram)
         ## CRIA O EXECUTÁVEL PARA CHAMAR O ORCA ##
-        print(Arquivos_gerados)
-        Executavel()
-        zerar()
+        #Executavel()
+        #zerar()
     else: Nova_Aba()
 
 ## ERRO DO FAUSTÃO ##
